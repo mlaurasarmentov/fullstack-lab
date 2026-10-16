@@ -8,7 +8,6 @@ from pydantic import BaseModel
 
 class EventInput(BaseModel):
     """Dados enviados pelo cliente ao cadastrar um evento."""
-
     title: str
     date: date
     capacity: int
@@ -32,12 +31,22 @@ def create_app() -> FastAPI:
 
     @app.post("/events", status_code=201)
     def create_event(data: EventInput):
+        if data.title == "" or data.capacity <= 0:
+            raise HTTPException(status_code=422, detail="Informações inválidas")
+        new_id = max(events, default=0) + 1
+        events_dict = {
+            "id": new_id,
+            "title": data.title,
+            "date": data.date,
+            "capacity": data.capacity,
+        }
+        events[new_id] = events_dict
+        return events_dict
+
         # Atividade 1: valide título e capacidade, gere um ID e guarde o
         # evento em `events`. A resposta deve conter id, title, date e capacity.
         # Os testes mostram os casos de sucesso e de entrada inválida.
-        raise HTTPException(status_code=501, detail="Cadastro ainda não implementado")
 
     return app
-
 
 app = create_app()
